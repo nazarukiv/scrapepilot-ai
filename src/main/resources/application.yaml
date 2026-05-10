@@ -1,3 +1,7 @@
 spring:
   application:
     name: scrapepilot-ai
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
