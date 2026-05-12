@@ -2,6 +2,13 @@ spring:
   application:
     name: scrapepilot-ai
 
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/scrapepilot
+    username: ivan
+    password: scrape010203
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true

@@ -5,6 +5,7 @@ import com.nazarukiv.scrapepilotai.dto.ScrapeTitleResponseDto;
 import java.io.IOException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +24,22 @@ public class JsoupScraperService {
                 .timeout(TIMEOUT_MILLIS)
                 .get();
 
-        return new ScrapeTitleResponseDto(url, document.title());
+        return new ScrapeTitleResponseDto(
+                url,
+                document.title(),
+                getMetaDescription(document),
+                getFirstH1Text(document),
+                document.select("a[href]").size()
+        );
+    }
+
+    private String getMetaDescription(Document document) {
+        Element metaDescription = document.selectFirst("meta[name=description]");
+        return metaDescription == null ? null : metaDescription.attr("content").trim();
+    }
+
+    private String getFirstH1Text(Document document) {
+        Element firstH1 = document.selectFirst("h1");
+        return firstH1 == null ? null : firstH1.text().trim();
     }
 }
