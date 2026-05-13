@@ -7,6 +7,8 @@ public record ScrapingTaskResponseDto(
         String name,
         String url,
         boolean active,
+        Integer executionIntervalSeconds,
+        Instant lastExecutedAt,
         Instant createdAt
 ) {
 }

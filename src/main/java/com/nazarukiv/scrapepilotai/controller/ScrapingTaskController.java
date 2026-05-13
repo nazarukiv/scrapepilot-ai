@@ -3,14 +3,17 @@ package com.nazarukiv.scrapepilotai.controller;
 import com.nazarukiv.scrapepilotai.dto.CreateScrapingTaskRequestDto;
 import com.nazarukiv.scrapepilotai.dto.ScrapeExecutionResponseDto;
 import com.nazarukiv.scrapepilotai.dto.ScrapingTaskResponseDto;
+import com.nazarukiv.scrapepilotai.dto.UpdateScrapingTaskRequestDto;
 import com.nazarukiv.scrapepilotai.service.ScrapeExecutionService;
 import com.nazarukiv.scrapepilotai.service.ScrapingTaskService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -40,6 +43,20 @@ public class ScrapingTaskController {
     @GetMapping
     public List<ScrapingTaskResponseDto> getAllTasks() {
         return scrapingTaskService.getAllTasks();
+    }
+
+    @PutMapping("/{id}")
+    public ScrapingTaskResponseDto updateTask(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateScrapingTaskRequestDto request
+    ) {
+        return scrapingTaskService.updateTask(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTask(@PathVariable Long id) {
+        scrapingTaskService.deleteTask(id);
     }
 
     @PostMapping("/{id}/execute")

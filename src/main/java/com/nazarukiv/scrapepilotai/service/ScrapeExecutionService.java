@@ -5,11 +5,13 @@ import com.nazarukiv.scrapepilotai.dto.ScrapeTitleResponseDto;
 import com.nazarukiv.scrapepilotai.entity.ScrapeExecution;
 import com.nazarukiv.scrapepilotai.entity.ScrapeExecutionStatus;
 import com.nazarukiv.scrapepilotai.entity.ScrapingTask;
+import com.nazarukiv.scrapepilotai.exception.InactiveScrapingTaskException;
 import com.nazarukiv.scrapepilotai.exception.ScrapingTaskNotFoundException;
 import com.nazarukiv.scrapepilotai.repository.ScrapeExecutionRepository;
 import com.nazarukiv.scrapepilotai.repository.ScrapingTaskRepository;
 import com.nazarukiv.scrapepilotai.scraper.JsoupScraperService;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,8 @@ public class ScrapeExecutionService {
     @Transactional
     public ScrapeExecutionResponseDto executeTask(Long taskId) {
         ScrapingTask task = getTaskOrThrow(taskId);
+        ensureTaskIsActive(task);
+
         long startedAt = System.nanoTime();
 
         try {
@@ -51,7 +55,10 @@ public class ScrapeExecutionService {
                     elapsedMillis(startedAt)
             );
 
-            return toResponse(scrapeExecutionRepository.save(execution));
+            ScrapeExecution savedExecution = scrapeExecutionRepository.save(execution);
+            task.markExecutedAt(lastExecutedAt(savedExecution));
+
+            return toResponse(savedExecution);
         } catch (Exception exception) {
             ScrapeExecution execution = new ScrapeExecution(
                     task,
@@ -82,8 +89,18 @@ public class ScrapeExecutionService {
                 .orElseThrow(() -> new ScrapingTaskNotFoundException(taskId));
     }
 
+    private void ensureTaskIsActive(ScrapingTask task) {
+        if (!task.isActive()) {
+            throw new InactiveScrapingTaskException();
+        }
+    }
+
     private long elapsedMillis(long startedAt) {
         return Duration.ofNanos(System.nanoTime() - startedAt).toMillis();
+    }
+
+    private Instant lastExecutedAt(ScrapeExecution execution) {
+        return execution.getExecutedAt() == null ? Instant.now() : execution.getExecutedAt();
     }
 
     private String safeErrorMessage(Exception exception) {
