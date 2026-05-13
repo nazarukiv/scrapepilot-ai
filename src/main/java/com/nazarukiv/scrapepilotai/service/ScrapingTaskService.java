@@ -51,6 +51,19 @@ public class ScrapingTaskService {
         return toResponse(task);
     }
 
+    @Transactional
+    public ScrapingTaskResponseDto updateTaskActive(Long taskId, boolean active) {
+        ScrapingTask task = getTaskOrThrow(taskId);
+        task.update(
+                task.getName(),
+                task.getUrl(),
+                active,
+                task.getExecutionIntervalSeconds()
+        );
+
+        return toResponse(task);
+    }
+
     @Transactional(readOnly = true)
     public List<ScrapingTask> getActiveTasksForScheduling() {
         return scrapingTaskRepository.findByActiveTrue();

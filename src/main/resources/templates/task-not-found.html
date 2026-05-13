@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrapePilot AI / Task Not Found</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="dashboard-shell">
+    <header class="topbar">
+        <div>
+            <p class="eyebrow">[task.monitor]</p>
+            <h1>Task Not Found</h1>
+        </div>
+        <nav class="topbar-links" aria-label="Task navigation">
+            <a th:href="@{/dashboard}">dashboard</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="section-block" aria-labelledby="not-found-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">[404]</p>
+                    <h2 id="not-found-heading">Missing Task</h2>
+                </div>
+                <span class="section-meta">not found</span>
+            </div>
+
+            <div class="empty-state">
+                <span class="empty-marker">[ ]</span>
+                <div>
+                    <strong th:text="${message}">Task was not found</strong>
+                    <span>The requested monitored task does not exist.</span>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

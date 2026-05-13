@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrapePilot AI / Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="dashboard-shell">
+    <header class="topbar">
+        <div>
+            <p class="eyebrow">[scrapepilot.ai]</p>
+            <h1>Execution Dashboard</h1>
+        </div>
+        <nav class="topbar-links" aria-label="Dashboard navigation">
+            <a href="#tasks">tasks</a>
+            <a href="#execution-history">history</a>
+        </nav>
+    </header>
+
+    <div class="flash flash-success" th:if="${dashboardNotice}" th:text="${dashboardNotice}"></div>
+    <div class="flash flash-danger" th:if="${dashboardError}" th:text="${dashboardError}"></div>
+
+    <main>
+        <section class="section-block" aria-labelledby="metrics-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">[metrics]</p>
+                    <h2 id="metrics-heading">Monitoring Overview</h2>
+                </div>
+                <span class="section-meta">live database snapshot</span>
+            </div>
+
+            <div class="metric-grid">
+                <article class="metric-card">
+                    <span class="metric-label">total tasks</span>
+                    <strong th:text="${dashboard.stats.totalTasks}">0</strong>
+                </article>
+                <article class="metric-card">
+                    <span class="metric-label">executions</span>
+                    <strong th:text="${dashboard.stats.totalExecutions}">0</strong>
+                </article>
+                <article class="metric-card metric-danger">
+                    <span class="metric-label">failures</span>
+                    <strong th:text="${dashboard.stats.totalFailures}">0</strong>
+                </article>
+                <article class="metric-card metric-success">
+                    <span class="metric-label">success rate</span>
+                    <strong th:classappend="${dashboard.stats.totalExecutions == 0} ? ' placeholder-value' : ''"
+                            th:text="${dashboard.stats.overallSuccessRateLabel}">No runs</strong>
+                </article>
+                <article class="metric-card">
+                    <span class="metric-label">avg response</span>
+                    <strong th:classappend="${dashboard.stats.totalExecutions == 0} ? ' placeholder-value' : ''"
+                            th:text="${dashboard.stats.averageResponseTimeLabel}">No samples</strong>
+                </article>
+                <article class="metric-card metric-wide">
+                    <span class="metric-label">latest execution</span>
+                    <strong class="timestamp"
+                            th:classappend="${dashboard.stats.latestExecutionTimestamp == null} ? ' placeholder-value' : ''"
+                            th:text="${dashboard.stats.latestExecutionTimestampLabel}">Waiting for first execution</strong>
+                </article>
+            </div>
+        </section>
+
+        <section id="tasks" class="section-block" aria-labelledby="tasks-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">[tasks]</p>
+                    <h2 id="tasks-heading">Task Monitoring</h2>
+                </div>
+                <span class="section-meta" th:text="|${#lists.size(dashboard.taskSummaries)} configured|">0 configured</span>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(dashboard.taskSummaries)}">
+                <span class="empty-marker">[ ]</span>
+                <div>
+                    <strong>no scraping tasks</strong>
+                    <span>Create tasks through the task API to populate monitoring cards.</span>
+                </div>
+            </div>
+
+            <div class="task-grid" th:if="${!#lists.isEmpty(dashboard.taskSummaries)}">
+                <article class="task-card"
+                         th:each="task : ${dashboard.taskSummaries}"
+                         th:classappend="${(!task.active ? ' task-card-inactive' : '') + (task.totalExecutions == 0 ? ' task-card-waiting' : '')}">
+                    <div class="task-card-header">
+                        <div class="task-title-block">
+                            <h3 th:text="${task.taskName}">Task name</h3>
+                            <a class="task-url" th:href="${task.targetUrl}" th:text="${task.targetUrl}">https://example.com</a>
+                        </div>
+                        <span class="status-badge status-active" th:if="${task.active}">ACTIVE</span>
+                        <span class="status-badge status-inactive" th:if="${!task.active}">INACTIVE</span>
+                    </div>
+
+                    <dl class="task-stats">
+                        <div>
+                            <dt>runs</dt>
+                            <dd th:text="${task.totalExecutions}">0</dd>
+                        </div>
+                        <div>
+                            <dt>success</dt>
+                            <dd th:text="${task.successCount}">0</dd>
+                        </div>
+                        <div>
+                            <dt>failed</dt>
+                            <dd th:text="${task.failureCount}">0</dd>
+                        </div>
+                        <div>
+                            <dt>rate</dt>
+                            <dd th:classappend="${task.totalExecutions == 0} ? ' placeholder-value' : ''"
+                                th:text="${task.successRateLabel}">No runs</dd>
+                        </div>
+                        <div>
+                            <dt>avg time</dt>
+                            <dd th:classappend="${task.totalExecutions == 0} ? ' placeholder-value' : ''"
+                                th:text="${task.averageResponseTimeLabel}">No samples</dd>
+                        </div>
+                        <div>
+                            <dt>latest</dt>
+                            <dd class="timestamp"
+                                th:classappend="${task.latestExecutionTimestamp == null} ? ' placeholder-value' : ''"
+                                th:text="${task.latestExecutionTimestampLabel}">Waiting for first execution</dd>
+                        </div>
+                    </dl>
+
+                    <p class="task-note" th:if="${task.totalExecutions == 0}">Waiting for first execution</p>
+
+                    <div class="task-footer">
+                        <div class="latest-status">
+                            <span class="status-badge status-waiting" th:if="${task.latestExecutionStatus == null}">WAITING</span>
+                            <span class="status-badge"
+                                  th:if="${task.latestExecutionStatus != null}"
+                                  th:classappend="${task.latestExecutionStatus.name() == 'SUCCESS'} ? ' status-success' : ' status-failed'"
+                                  th:text="${task.latestExecutionStatus}">SUCCESS</span>
+                        </div>
+                        <div class="task-actions">
+                            <form th:action="@{/dashboard/tasks/{id}/execute(id=${task.taskId})}" method="post">
+                                <button class="button-primary" type="submit" th:disabled="${!task.active}">Execute</button>
+                            </form>
+                            <a class="button-secondary" th:href="@{/tasks/{id}(id=${task.taskId})}">History</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="execution-history" class="section-block" aria-labelledby="history-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">[history]</p>
+                    <h2 id="history-heading">Execution History</h2>
+                </div>
+                <div class="history-controls">
+                    <span class="section-meta" th:if="${dashboard.selectedTaskName == null}"
+                          th:text="|latest ${dashboard.historyLimit} executions|">latest 50 executions</span>
+                    <span class="section-meta" th:if="${dashboard.selectedTaskName != null}"
+                          th:text="|task=${dashboard.selectedTaskName}|">task=selected</span>
+                    <a class="button-secondary button-compact" th:if="${dashboard.selectedTaskName != null}"
+                       th:href="@{/dashboard#execution-history}">Clear</a>
+                </div>
+            </div>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(dashboard.executionHistory)}">
+                <span class="empty-marker">[ ]</span>
+                <div>
+                    <strong>no executions</strong>
+                    <span th:text="${dashboard.selectedTaskName != null ? 'No executions recorded for the selected task.' : 'Run a task to start building execution history.'}">
+                        Run a task to start building execution history.
+                    </span>
+                </div>
+            </div>
+
+            <div class="table-shell" th:if="${!#lists.isEmpty(dashboard.executionHistory)}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th scope="col">execution id</th>
+                        <th scope="col">task</th>
+                        <th scope="col">status</th>
+                        <th scope="col">response</th>
+                        <th scope="col">executed at</th>
+                        <th scope="col">extracted title</th>
+                        <th scope="col">error</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="execution : ${dashboard.executionHistory}">
+                        <td class="mono-cell" th:text="|#${execution.executionId}|">#1</td>
+                        <td class="task-name-cell" th:text="${execution.taskName}">Task name</td>
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="${execution.status.name() == 'SUCCESS'} ? ' status-success' : ' status-failed'"
+                                  th:text="${execution.status}">SUCCESS</span>
+                        </td>
+                        <td class="mono-cell" th:text="${execution.responseTimeLabel}">0ms</td>
+                        <td class="timestamp" th:text="${execution.executedAtLabel}">timestamp</td>
+                        <td class="truncate-cell"
+                            th:title="${execution.extractedTitle != null ? execution.extractedTitle : ''}"
+                            th:text="${execution.extractedTitle != null ? execution.extractedTitle : '-'}">-</td>
+                        <td class="truncate-cell error-cell"
+                            th:classappend="${execution.errorMessage != null} ? ' has-error' : ''"
+                            th:title="${execution.errorMessage != null ? execution.errorMessage : ''}"
+                            th:text="${execution.errorMessage != null ? execution.errorMessage : '-'}">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>
