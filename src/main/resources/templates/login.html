@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrapePilot AI / Login</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body class="auth-body">
+<div class="auth-shell">
+    <header class="auth-header">
+        <div>
+            <p class="eyebrow">[scrapepilot.ai]</p>
+            <h1>Protected Console</h1>
+        </div>
+        <span class="status-badge status-waiting">SESSION REQUIRED</span>
+    </header>
+
+    <main>
+        <section class="auth-panel" aria-labelledby="login-heading">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">[auth]</p>
+                    <h2 id="login-heading">Operator Login</h2>
+                </div>
+                <span class="section-meta">internal access</span>
+            </div>
+
+            <div class="flash flash-danger" th:if="${loginError}">
+                Invalid credentials.
+            </div>
+            <div class="flash flash-danger" th:if="${accountDisabled}">
+                Account is disabled.
+            </div>
+            <div class="flash flash-success" th:if="${loggedOut}">
+                Session closed.
+            </div>
+            <div class="flash flash-danger" th:if="${sessionExpired}">
+                Session expired.
+            </div>
+
+            <form class="auth-form" th:action="@{/login}" method="post">
+                <label class="form-field" for="username">
+                    <span>username</span>
+                    <input id="username"
+                           name="username"
+                           type="text"
+                           autocomplete="username"
+                           autofocus
+                           required>
+                </label>
+
+                <label class="form-field" for="password">
+                    <span>password</span>
+                    <input id="password"
+                           name="password"
+                           type="password"
+                           autocomplete="current-password"
+                           required>
+                </label>
+
+                <div class="auth-form-footer">
+                    <span class="section-meta">session-backed</span>
+                    <button class="button-primary" type="submit">Login</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</div>
+</body>
+</html>

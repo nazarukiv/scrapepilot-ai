@@ -12,3 +12,11 @@ spring:
       ddl-auto: update
 
     show-sql: true
+
+scrapepilot:
+  security:
+    default-admin:
+      create-if-missing: ${SCRAPEPILOT_ADMIN_CREATE:true}
+      username: ${SCRAPEPILOT_ADMIN_USERNAME:admin}
+      password: ${SCRAPEPILOT_ADMIN_PASSWORD:admin123}
+      enabled: ${SCRAPEPILOT_ADMIN_ENABLED:true}

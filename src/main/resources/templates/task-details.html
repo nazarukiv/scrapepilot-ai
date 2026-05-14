@@ -13,10 +13,21 @@
             <p class="eyebrow">[task.monitor]</p>
             <h1 th:text="${taskDetails.taskName}">Task details</h1>
         </div>
-        <nav class="topbar-links" aria-label="Task navigation">
-            <a th:href="@{/dashboard}">dashboard</a>
-            <a href="#execution-history">history</a>
-        </nav>
+        <div class="topbar-actions">
+            <nav class="topbar-links" aria-label="Task navigation">
+                <a th:href="@{/dashboard}">dashboard</a>
+                <a href="#execution-history">history</a>
+            </nav>
+            <div class="auth-nav" th:if="${authenticatedUser != null}">
+                <span class="auth-user">
+                    <span th:text="${authenticatedUser.username}">admin</span>
+                    <span class="status-badge status-active" th:text="${authenticatedUser.roleLabel}">ADMIN</span>
+                </span>
+                <form th:action="@{/logout}" method="post">
+                    <button class="button-secondary button-compact" type="submit">Logout</button>
+                </form>
+            </div>
+        </div>
     </header>
 
     <div class="flash flash-success" th:if="${taskNotice}" th:text="${taskNotice}"></div>

@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScrapePilot AI / Task Not Found</title>
+    <title>ScrapePilot AI / Access Denied</title>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
 <body>
 <div class="dashboard-shell">
     <header class="topbar">
         <div>
-            <p class="eyebrow">[task.monitor]</p>
-            <h1>Task Not Found</h1>
+            <p class="eyebrow">[auth]</p>
+            <h1>Access Denied</h1>
         </div>
         <div class="topbar-actions">
-            <nav class="topbar-links" aria-label="Task navigation">
+            <nav class="topbar-links" aria-label="Access denied navigation">
                 <a th:href="@{/dashboard}">dashboard</a>
             </nav>
             <div class="auth-nav" th:if="${authenticatedUser != null}">
@@ -30,20 +30,20 @@
     </header>
 
     <main>
-        <section class="section-block" aria-labelledby="not-found-heading">
+        <section class="section-block" aria-labelledby="access-denied-heading">
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">[404]</p>
-                    <h2 id="not-found-heading">Missing Task</h2>
+                    <p class="eyebrow">[403]</p>
+                    <h2 id="access-denied-heading">Insufficient Access</h2>
                 </div>
-                <span class="section-meta">not found</span>
+                <span class="section-meta">authorization blocked</span>
             </div>
 
             <div class="empty-state">
                 <span class="empty-marker">[ ]</span>
                 <div>
-                    <strong th:text="${message}">Task was not found</strong>
-                    <span>The requested monitored task does not exist.</span>
+                    <strong>admin authorization required</strong>
+                    <span>The requested operation is restricted.</span>
                 </div>
             </div>
         </section>
